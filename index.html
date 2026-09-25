@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Meu Bloco de Anotações</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --bg: #f4f6fb;
+    --card: #ffffff;
+    --text: #182033;
+    --muted: #70798c;
+    --line: #e4e8f0;
+    --accent: #5b5bf7;
+    --accent-hover: #4646d8;
+    --danger: #e5484d;
+}
+
+body.dark {
+    --bg: #11131a;
+    --card: #191c25;
+    --text: #f2f4f8;
+    --muted: #9ba3b4;
+    --line: #2a2f3b;
+    --accent: #7b7cff;
+    --accent-hover: #6667e8;
+    --danger: #ff6469;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+}
+
+button,
+input,
+textarea {
+    font: inherit;
+}
+
+button {
+    cursor: pointer;
+    border: none;
+}
+
+/* LAYOUT */
+
+.app {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* BARRA LATERAL */
+
+.sidebar {
+    width: 270px;
+    background: var(--card);
+    border-right: 1px solid var(--line);
+    padding: 22px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.logo {
+    font-size: 22px;
+    font-weight: 800;
+    padding: 4px 8px;
+}
+
+.logo span {
+    color: var(--accent);
+}
+
+.new {
+    background: var(--accent);
+    color: white;
+    border-radius: 12px;
+    padding: 13px;
+    font-weight: 700;
+}
+
+.new:hover {
+    background: var(--accent-hover);
+}
+
+.search {
+    width: 100%;
+    padding: 11px 12px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--bg);
+    color: var(--text);
+    outline: none;
+}
+
+.nav {
+    display: grid;
+    gap: 5px;
+}
+
+.nav button {
+    background: transparent;
+    color: var(--text);
+    text-align: left;
+    padding: 11px 12px;
+    border-radius: 9px;
+}
+
+.nav button:hover,
+.nav button.active {
+    background: rgba(91, 91, 247, 0.12);
+    color: var(--accent);
+}
+
+.side-bottom {
+    margin-top: auto;
+    display: grid;
+    gap: 7px;
+}
+
+.small-btn {
+    background: var(--bg);
+    color: var(--text);
+    padding: 10px;
+    border-radius: 9px;
+    text-align: left;
+}
+
+/* ÁREA PRINCIPAL */
+
+.main {
+    flex: 1;
+    min-width: 0;
+    padding: 28px;
+}
+
+.top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 22px;
+}
+
+.title {
+    font-size: 27px;
+    font-weight: 800;
+}
+
+.counter {
+    color: var(--muted);
+    font-size: 14px;
+}
+
+/* NOTAS */
+
+.notes {
+    display: grid;
+    grid-template-columns: repeat(
+        auto-fill,
+        minmax(230px, 1fr)
+    );
+    gap: 16px;
+}
+
+.note {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 15px;
+    padding: 17px;
+    min-height: 170px;
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+    transition: 0.15s;
+    position: relative;
+}
+
+.note:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 7px 25px rgba(0, 0, 0, 0.07);
+}
+
+.note.pinned {
+    border-color: var(--accent);
+}
+
+.note h3 {
+    font-size: 17px;
+    margin-bottom: 9px;
+    padding-right: 24px;
+}
+
+.note p {
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    overflow: hidden;
+
+    display: -webkit-box;
+    -webkit-line-clamp: 5;
+    -webkit-box-orient: vertical;
+}
+
+.note footer {
+    margin-top: auto;
+    padding-top: 15px;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.pin {
+    position: absolute;
+    right: 14px;
+    top: 13px;
+    color: var(--accent);
+    font-size: 17px;
+}
+
+.empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 70px 20px;
+    color: var(--muted);
+}
+
+.empty strong {
+    display: block;
+    color: var(--text);
+    font-size: 19px;
+    margin-bottom: 7px;
+}
+
+/* JANELA DA NOTA */
+
+.modal-bg {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    z-index: 10;
+}
+
+.modal-bg.show {
+    display: flex;
+}
+
+.modal {
+    background: var(--card);
+    width: min(700px, 100%);
+    border-radius: 18px;
+    padding: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+}
+
+.modal-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.close {
+    background: transparent;
+    color: var(--muted);
+    font-size: 26px;
+}
+
+#noteTitle,
+#noteBody {
+    width: 100%;
+    border: 1px solid var(--line);
+    background: var(--bg);
+    color: var(--text);
+    border-radius: 10px;
+    padding: 12px;
+    outline: none;
+}
+
+#noteTitle {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+#noteBody {
+    min-height: 300px;
+    resize: vertical;
+    line-height: 1.55;
+}
+
+/* BOTÕES */
+
+.actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 13px;
+    justify-content: space-between;
+}
+
+.actions-left,
+.actions-right {
+    display: flex;
+    gap: 8px;
+}
+
+.action {
+    padding: 10px 13px;
+    border-radius: 9px;
+    background: var(--bg);
+    color: var(--text);
+}
+
+.save {
+    background: var(--accent);
+    color: white;
+}
+
+.delete {
+    color: var(--danger);
+}
+
+/* CELULAR */
+
+@media (max-width: 700px) {
+
+    .sidebar {
+        width: 220px;
+    }
+
+    .main {
+        padding: 18px;
+    }
+
+    .notes {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 520px) {
+
+    .app {
+        display: block;
+    }
+
+    .sidebar {
+        width: 100%;
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+    }
+
+    .nav {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .side-bottom {
+        margin-top: 0;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .main {
+        padding: 15px;
+    }
+}
+</style>
+</head>
+
+<body><div class="app">
+
+    <!-- BARRA LATERAL -->
+    <aside class="sidebar">
+
+        <div class="logo">
+            📝 Meu <span>Bloco</span>
+        </div>
+
+        <button class="new" onclick="openNew()">
+            ＋ Nova anotação
+        </button>
+
+        <input
+            class="search"
+            id="search"
+            type="text"
+            placeholder="🔎 Procurar..."
+            oninput="render()"
+        >
+
+        <div class="nav">
+
+            <button
+                id="allBtn"
+                class="active"
+                onclick="setFilter('all')"
+            >
+                📒 Todas as notas
+            </button>
+
+            <button onclick="setFilter('pinned')">
+                📌 Fixadas
+            </button>
+
+        </div>
+
+        <div class="side-bottom">
+
+            <button
+                class="small-btn"
+                onclick="toggleDark()"
+            >
+                🌙 Tema
+            </button>
+
+            <button
+                class="small-btn"
+                onclick="exportNotes()"
+            >
+                ⬇️ Exportar
+            </button>
+
+            <button
+                class="small-btn"
+                onclick="importNotes()"
+            >
+                ⬆️ Importar
+            </button>
+
+            <input
+                type="file"
+                id="file"
+                accept=".json"
+                hidden
+                onchange="readImport(event)"
+            >
+
+        </div>
+
+    </aside>
+
+
+    <!-- ÁREA PRINCIPAL -->
+    <main class="main">
+
+        <div class="top">
+
+            <div>
+
+                <div class="title">
+                    Minhas anotações
+                </div>
+
+                <div
+                    class="counter"
+                    id="counter"
+                ></div>
+
+            </div>
+
+        </div>
+
+
+        <!-- AS NOTAS APARECERÃO AQUI -->
+        <section
+            class="notes"
+            id="notes"
+        ></section>
+
+    </main>
+
+</div>
+
+
+<!-- JANELA PARA CRIAR/EDITAR NOTA -->
+
+<div
+    class="modal-bg"
+    id="modal"
+>
+
+    <div class="modal">
+
+        <div class="modal-head">
+
+            <strong id="modalTitle">
+                Nova anotação
+            </strong>
+
+            <button
+                class="close"
+                onclick="closeModal()"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <input
+            id="noteTitle"
+            maxlength="100"
+            placeholder="Título da anotação"
+        >
+
+
+        <textarea
+            id="noteBody"
+            placeholder="Escreva sua anotação aqui..."
+        ></textarea>
+
+
+        <div class="actions">
+
+            <div class="actions-left">
+
+                <button
+                    class="action delete"
+                    id="deleteBtn"
+                    onclick="deleteCurrent()"
+                >
+                    🗑️ Excluir
+                </button>
+
+                <button
+                    class="action"
+                    id="pinBtn"
+                    onclick="togglePin()"
+                >
+                    📌 Fixar
+                </button>
+
+            </div>
+
+
+            <div class="actions-right">
+
+                <button
+                    class="action"
+                    onclick="closeModal()"
+                >
+                    Cancelar
+                </button>
+
+                <button
+                    class="action save"
+                    onclick="saveNote()"
+                >
+                    Salvar
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>let notes = JSON.parse(
+    localStorage.getItem("meuBlocoNotas") || "[]"
+);
+
+let filter = "all";
+let currentId = null;
+
+
+/* SALVAR DADOS */
+
+function saveData() {
+
+    localStorage.setItem(
+        "meuBlocoNotas",
+        JSON.stringify(notes)
+    );
+
+}
+
+
+/* NOVA ANOTAÇÃO */
+
+function openNew() {
+
+    currentId = null;
+
+    document.getElementById("modalTitle").textContent =
+        "Nova anotação";
+
+    document.getElementById("noteTitle").value = "";
+
+    document.getElementById("noteBody").value = "";
+
+    document.getElementById("deleteBtn").style.display =
+        "none";
+
+    updatePinButton(false);
+
+    document
+        .getElementById("modal")
+        .classList.add("show");
+
+    setTimeout(() => {
+
+        document
+            .getElementById("noteTitle")
+            .focus();
+
+    }, 50);
+
+}
+
+
+/* EDITAR ANOTAÇÃO */
+
+function openEdit(id) {
+
+    const note = notes.find(
+        item => item.id === id
+    );
+
+    if (!note) return;
+
+    currentId = id;
+
+    document.getElementById("modalTitle").textContent =
+        "Editar anotação";
+
+    document.getElementById("noteTitle").value =
+        note.title;
+
+    document.getElementById("noteBody").value =
+        note.body;
+
+    document.getElementById("deleteBtn").style.display =
+        "block";
+
+    updatePinButton(note.pinned);
+
+    document
+        .getElementById("modal")
+        .classList.add("show");
+
+}
+
+
+/* FECHAR JANELA */
+
+function closeModal() {
+
+    document
+        .getElementById("modal")
+        .classList.remove("show");
+
+}
+
+
+/* SALVAR ANOTAÇÃO */
+
+function saveNote() {
+
+    const title =
+        document
+            .getElementById("noteTitle")
+            .value
+            .trim() || "Sem título";
+
+    const body =
+        document
+            .getElementById("noteBody")
+            .value
+            .trim();
+
+
+    /* EDITANDO UMA NOTA */
+
+    if (currentId) {
+
+        const note = notes.find(
+            item => item.id === currentId
+        );
+
+        note.title = title;
+        note.body = body;
+        note.updated = Date.now();
+
+    }
+
+
+    /* CRIANDO UMA NOVA NOTA */
+
+    else {
+
+        notes.unshift({
+
+            id: Date.now().toString(),
+
+            title: title,
+
+            body: body,
+
+            pinned: false,
+
+            updated: Date.now()
+
+        });
+
+    }
+
+
+    saveData();
+
+    closeModal();
+
+    render();
+
+}
+
+
+/* EXCLUIR */
+
+function deleteCurrent() {
+
+    if (!currentId) return;
+
+
+    if (
+        confirm(
+            "Tem certeza que deseja excluir esta anotação?"
+        )
+    ) {
+
+        notes = notes.filter(
+            note => note.id !== currentId
+        );
+
+        saveData();
+
+        closeModal();
+
+        render();
+
+    }
+
+}
+
+
+/* FIXAR / DESFIXAR */
+
+function togglePin() {
+
+    if (!currentId) return;
+
+    const note = notes.find(
+        item => item.id === currentId
+    );
+
+    if (!note) return;
+
+    note.pinned = !note.pinned;
+
+    updatePinButton(note.pinned);
+
+    saveData();
+
+    render();
+
+}
+
+
+/* TEXTO DO BOTÃO DE FIXAR */
+
+function updatePinButton(pinned) {
+
+    document.getElementById("pinBtn").textContent =
+        pinned
+            ? "📌 Desfixar"
+            : "📌 Fixar";
+
+}
+
+
+/* FILTRO */
+
+function setFilter(type) {
+
+    filter = type;
+
+
+    document
+        .querySelectorAll(".nav button")
+        .forEach(button => {
+
+            button.classList.remove("active");
+
+        });
+
+
+    if (type === "all") {
+
+        document
+            .getElementById("allBtn")
+            .classList.add("active");
+
+    }
+
+    else {
+
+        document
+            .querySelectorAll(".nav button")[1]
+            .classList.add("active");
+
+    }
+
+
+    render();
+
+}
+
+
+/* MOSTRAR NOTAS */
+
+function render() {
+
+    const search =
+        document
+            .getElementById("search")
+            .value
+            .toLowerCase();
+
+
+    let list = notes.filter(note => {
+
+        const matchesFilter =
+            filter === "all" || note.pinned;
+
+        const matchesSearch =
+            note.title
+                .toLowerCase()
+                .includes(search)
+
+            ||
+
+            note.body
+                .toLowerCase()
+                .includes(search);
+
+
+        return matchesFilter && matchesSearch;
+
+    });
+
+
+    /* NOTAS FIXADAS PRIMEIRO */
+
+    list.sort((a, b) => {
+
+        return (
+            (b.pinned - a.pinned)
+            ||
+            ((b.updated || 0) - (a.updated || 0))
+        );
+
+    });
+
+
+    document.getElementById("counter").textContent =
+
+        `${list.length} ${
+            list.length === 1
+                ? "anotação"
+                : "anotações"
+        }`;
+
+
+    const box =
+        document.getElementById("notes");
+
+
+    /* NENHUMA NOTA */
+
+    if (list.length === 0) {
+
+        box.innerHTML = `
+
+            <div class="empty">
+
+                <strong>
+                    Nenhuma anotação encontrada
+                </strong>
+
+                <span>
+                    Crie sua primeira anotação
+                    clicando em "Nova anotação".
+                </span>
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    /* CRIAR CARDS */
+
+    box.innerHTML = list.map(note => `
+
+        <article
+            class="note ${
+                note.pinned ? "pinned" : ""
+            }"
+            onclick="openEdit('${note.id}')"
+        >
+
+            ${
+                note.pinned
+                    ? '<div class="pin">📌</div>'
+                    : ''
+            }
+
+
+            <h3>
+                ${escapeHtml(note.title)}
+            </h3>
+
+
+            <p>
+                ${escapeHtml(
+                    note.body || "Sem conteúdo."
+                )}
+            </p>
+
+
+            <footer>
+                ${formatDate(note.updated)}
+            </footer>
+
+        </article>
+
+    `).join("");
+
+}
+
+
+/* PROTEGER TEXTO HTML */
+
+function escapeHtml(text) {
+
+    return text.replace(
+        /[&<>"']/g,
+
+        character => ({
+
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#039;"
+
+        })[character]
+
+    );
+
+}
+
+
+/* DATA */
+
+function formatDate(timestamp) {
+
+    return new Date(
+        timestamp || Date.now()
+    ).toLocaleString(
+        "pt-BR",
+        {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit"
+        }
+    );
+
+}
+
+
+/* MODO ESCURO */
+
+function toggleDark() {
+
+    document
+        .body
+        .classList
+        .toggle("dark");
+
+
+    localStorage.setItem(
+
+        "meuBlocoTema",
+
+        document
+            .body
+            .classList
+            .contains("dark")
+                ? "dark"
+                : "light"
+
+    );
+
+}
+
+
+/* EXPORTAR */
+
+function exportNotes() {
+
+    const blob = new Blob(
+
+        [
+            JSON.stringify(
+                notes,
+                null,
+                2
+            )
+        ],
+
+        {
+            type: "application/json"
+        }
+
+    );
+
+
+    const link =
+        document.createElement("a");
+
+
+    link.href =
+        URL.createObjectURL(blob);
+
+
+    link.download =
+        "minhas-anotacoes.json";
+
+
+    link.click();
+
+
+    URL.revokeObjectURL(link.href);
+
+}
+
+
+/* IMPORTAR */
+
+function importNotes() {
+
+    document
+        .getElementById("file")
+        .click();
+
+}
+
+
+/* LER ARQUIVO IMPORTADO */
+
+function readImport(event) {
+
+    const file =
+        event.target.files[0];
+
+
+    if (!file) return;
+
+
+    const reader =
+        new FileReader();
+
+
+    reader.onload = () => {
+
+        try {
+
+            const imported =
+                JSON.parse(
+                    reader.result
+                );
+
+
+            if (!Array.isArray(imported)) {
+
+                throw new Error();
+
+            }
+
+
+            notes = imported;
+
+            saveData();
+
+            render();
+
+            alert(
+                "Anotações importadas com sucesso!"
+            );
+
+        }
+
+        catch {
+
+            alert(
+                "O arquivo selecionado é inválido."
+            );
+
+        }
+
+    };
+
+
+    reader.readAsText(file);
+
+
+    event.target.value = "";
+
+}
+
+
+/* CARREGAR TEMA */
+
+if (
+    localStorage.getItem("meuBlocoTema")
+    ===
+    "dark"
+) {
+
+    document
+        .body
+        .classList
+        .add("dark");
+
+}
+
+
+/* MOSTRAR NOTAS AO ABRIR */
+
+render();
+
+
+/* FECHAR CLICANDO FORA DA JANELA */
+
+document
+    .getElementById("modal")
+    .addEventListener(
+        "click",
+        event => {
+
+            if (
+                event.target.id === "modal"
+            ) {
+
+                closeModal();
+
+            }
+
+        }
+    );
+
+
+/* TECLA ESC */
+
+document.addEventListener(
+    "keydown",
+    event => {
+
+        if (event.key === "Escape") {
+
+            closeModal();
+
+        }
+
+
+        /* CTRL + ENTER = SALVAR */
+
+        if (
+            (event.ctrlKey || event.metaKey)
+            &&
+            event.key === "Enter"
+            &&
+            document
+                .getElementById("modal")
+                .classList
+                .contains("show")
+        ) {
+
+            saveNote();
+
+        }
+
+    }
+);
+
+</script>
+
+</body>
+</html>
