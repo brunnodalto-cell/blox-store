@@ -1,1220 +1,943 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gaste a Fortuna — Simulador</title>
 
-<title>Meu Bloco de Anotações</title>
-
-<style>
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
-
-:root {
-    --bg: #f4f6fb;
-    --card: #ffffff;
-    --text: #182033;
-    --muted: #70798c;
-    --line: #e4e8f0;
-    --accent: #5b5bf7;
-    --accent-hover: #4646d8;
-    --danger: #e5484d;
-}
-
-body.dark {
-    --bg: #11131a;
-    --card: #191c25;
-    --text: #f2f4f8;
-    --muted: #9ba3b4;
-    --line: #2a2f3b;
-    --accent: #7b7cff;
-    --accent-hover: #6667e8;
-    --danger: #ff6469;
-}
-
-body {
-    font-family: Arial, Helvetica, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-}
-
-button,
-input,
-textarea {
-    font: inherit;
-}
-
-button {
-    cursor: pointer;
-    border: none;
-}
-
-/* LAYOUT */
-
-.app {
-    display: flex;
-    min-height: 100vh;
-}
-
-/* BARRA LATERAL */
-
-.sidebar {
-    width: 270px;
-    background: var(--card);
-    border-right: 1px solid var(--line);
-    padding: 22px 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-}
-
-.logo {
-    font-size: 22px;
-    font-weight: 800;
-    padding: 4px 8px;
-}
-
-.logo span {
-    color: var(--accent);
-}
-
-.new {
-    background: var(--accent);
-    color: white;
-    border-radius: 12px;
-    padding: 13px;
-    font-weight: 700;
-}
-
-.new:hover {
-    background: var(--accent-hover);
-}
-
-.search {
-    width: 100%;
-    padding: 11px 12px;
-    border: 1px solid var(--line);
-    border-radius: 10px;
-    background: var(--bg);
-    color: var(--text);
-    outline: none;
-}
-
-.nav {
-    display: grid;
-    gap: 5px;
-}
-
-.nav button {
-    background: transparent;
-    color: var(--text);
-    text-align: left;
-    padding: 11px 12px;
-    border-radius: 9px;
-}
-
-.nav button:hover,
-.nav button.active {
-    background: rgba(91, 91, 247, 0.12);
-    color: var(--accent);
-}
-
-.side-bottom {
-    margin-top: auto;
-    display: grid;
-    gap: 7px;
-}
-
-.small-btn {
-    background: var(--bg);
-    color: var(--text);
-    padding: 10px;
-    border-radius: 9px;
-    text-align: left;
-}
-
-/* ÁREA PRINCIPAL */
-
-.main {
-    flex: 1;
-    min-width: 0;
-    padding: 28px;
-}
-
-.top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 15px;
-    margin-bottom: 22px;
-}
-
-.title {
-    font-size: 27px;
-    font-weight: 800;
-}
-
-.counter {
-    color: var(--muted);
-    font-size: 14px;
-}
-
-/* NOTAS */
-
-.notes {
-    display: grid;
-    grid-template-columns: repeat(
-        auto-fill,
-        minmax(230px, 1fr)
-    );
-    gap: 16px;
-}
-
-.note {
-    background: var(--card);
-    border: 1px solid var(--line);
-    border-radius: 15px;
-    padding: 17px;
-    min-height: 170px;
-    display: flex;
-    flex-direction: column;
-    cursor: pointer;
-    transition: 0.15s;
-    position: relative;
-}
-
-.note:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 7px 25px rgba(0, 0, 0, 0.07);
-}
-
-.note.pinned {
-    border-color: var(--accent);
-}
-
-.note h3 {
-    font-size: 17px;
-    margin-bottom: 9px;
-    padding-right: 24px;
-}
-
-.note p {
-    color: var(--muted);
-    font-size: 14px;
-    line-height: 1.5;
-    white-space: pre-wrap;
-    overflow: hidden;
-
-    display: -webkit-box;
-    -webkit-line-clamp: 5;
-    -webkit-box-orient: vertical;
-}
-
-.note footer {
-    margin-top: auto;
-    padding-top: 15px;
-    color: var(--muted);
-    font-size: 12px;
-}
-
-.pin {
-    position: absolute;
-    right: 14px;
-    top: 13px;
-    color: var(--accent);
-    font-size: 17px;
-}
-
-.empty {
-    grid-column: 1 / -1;
-    text-align: center;
-    padding: 70px 20px;
-    color: var(--muted);
-}
-
-.empty strong {
-    display: block;
-    color: var(--text);
-    font-size: 19px;
-    margin-bottom: 7px;
-}
-
-/* JANELA DA NOTA */
-
-.modal-bg {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.55);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    padding: 18px;
-    z-index: 10;
-}
-
-.modal-bg.show {
-    display: flex;
-}
-
-.modal {
-    background: var(--card);
-    width: min(700px, 100%);
-    border-radius: 18px;
-    padding: 20px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
-}
-
-.modal-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
-}
-
-.close {
-    background: transparent;
-    color: var(--muted);
-    font-size: 26px;
-}
-
-#noteTitle,
-#noteBody {
-    width: 100%;
-    border: 1px solid var(--line);
-    background: var(--bg);
-    color: var(--text);
-    border-radius: 10px;
-    padding: 12px;
-    outline: none;
-}
-
-#noteTitle {
-    font-size: 20px;
-    font-weight: 700;
-    margin-bottom: 10px;
-}
-
-#noteBody {
-    min-height: 300px;
-    resize: vertical;
-    line-height: 1.55;
-}
-
-/* BOTÕES */
-
-.actions {
-    display: flex;
-    gap: 8px;
-    margin-top: 13px;
-    justify-content: space-between;
-}
-
-.actions-left,
-.actions-right {
-    display: flex;
-    gap: 8px;
-}
-
-.action {
-    padding: 10px 13px;
-    border-radius: 9px;
-    background: var(--bg);
-    color: var(--text);
-}
-
-.save {
-    background: var(--accent);
-    color: white;
-}
-
-.delete {
-    color: var(--danger);
-}
-
-/* CELULAR */
-
-@media (max-width: 700px) {
-
-    .sidebar {
-        width: 220px;
+  <style>
+    :root {
+      --bg: #090d18;
+      --panel: #121a2b;
+      --panel-light: #1a263b;
+      --text: #f4f7ff;
+      --muted: #9ba9c1;
+      --gold: #f6c453;
+      --gold-light: #ffe49a;
+      --green: #5be0a0;
+      --red: #ff7777;
+      --border: rgba(255,255,255,.09);
     }
 
-    .main {
-        padding: 18px;
+    * {
+      box-sizing: border-box;
     }
 
-    .notes {
+    body {
+      margin: 0;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 15% 0%, rgba(64, 91, 150, .22), transparent 35%),
+        radial-gradient(circle at 90% 10%, rgba(246, 196, 83, .10), transparent 28%),
+        var(--bg);
+      font-family: Arial, Helvetica, sans-serif;
+      min-height: 100vh;
+    }
+
+    button, input {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .container {
+      width: min(1200px, 92%);
+      margin: 0 auto;
+    }
+
+    header {
+      padding: 38px 0 24px;
+      text-align: center;
+    }
+
+    .eyebrow {
+      display: inline-block;
+      color: var(--gold-light);
+      background: rgba(246,196,83,.10);
+      border: 1px solid rgba(246,196,83,.28);
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 16px 0 10px;
+      font-size: clamp(34px, 6vw, 62px);
+      line-height: 1;
+      letter-spacing: -2px;
+    }
+
+    h1 span {
+      color: var(--gold);
+    }
+
+    .subtitle {
+      color: var(--muted);
+      max-width: 650px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    .mode-panel {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin: 28px 0;
+    }
+
+    .mode-btn {
+      border: 1px solid #d9ad43;
+      color: #2a1d05;
+      background: linear-gradient(135deg, #ffe49a, #f6c453 55%, #e8a92e);
+      border-radius: 14px;
+      padding: 14px 22px;
+      font-weight: 900;
+      box-shadow: 0 5px 18px rgba(246,196,83,.18);
+      transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+    }
+
+    .mode-btn:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.08);
+      box-shadow: 0 8px 24px rgba(246,196,83,.32);
+    }
+
+    .mode-btn.active {
+      outline: 2px solid #fff0b5;
+      outline-offset: 2px;
+      box-shadow:
+        0 0 0 4px rgba(246,196,83,.15),
+        0 0 28px rgba(246,196,83,.45);
+      transform: translateY(-2px);
+    }
+
+    .mode-btn:focus-visible,
+    button:focus-visible,
+    input:focus-visible {
+      outline: 3px solid #fff0b5;
+      outline-offset: 3px;
+    }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin: 24px 0;
+    }
+
+    .stat {
+      background: linear-gradient(145deg, rgba(26,38,59,.96), rgba(16,24,39,.96));
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 20px;
+      min-width: 0;
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 10px;
+    }
+
+    .stat-value {
+      font-size: clamp(18px, 2.8vw, 27px);
+      font-weight: 900;
+      overflow-wrap: anywhere;
+    }
+
+    .stat-value.gold {
+      color: var(--gold-light);
+    }
+
+    .progress-wrap {
+      margin: 0 0 24px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      padding: 16px 18px;
+    }
+
+    .progress-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 10px;
+    }
+
+    .progress-track {
+      height: 11px;
+      background: #28344a;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, #e9a92f, #ffe49a);
+      border-radius: inherit;
+      transition: width .25s ease;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin: 24px 0 18px;
+    }
+
+    .search {
+      flex: 1 1 250px;
+      background: var(--panel);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 13px 15px;
+      min-width: 0;
+    }
+
+    .toolbar select {
+      background: var(--panel);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 13px;
+    }
+
+    .section-heading {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin: 28px 0 14px;
+    }
+
+    .section-heading h2 {
+      margin: 0;
+      font-size: 23px;
+    }
+
+    .section-heading span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .products {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .product {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      background: linear-gradient(155deg, var(--panel-light), var(--panel));
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 18px;
+      transition: transform .18s ease, border-color .18s ease;
+    }
+
+    .product:hover {
+      transform: translateY(-3px);
+      border-color: rgba(246,196,83,.45);
+    }
+
+    .product-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .product-icon {
+      display: grid;
+      place-items: center;
+      width: 54px;
+      height: 54px;
+      flex: 0 0 54px;
+      border-radius: 15px;
+      background: rgba(246,196,83,.12);
+      font-size: 28px;
+    }
+
+    .tag {
+      background: rgba(246,196,83,.12);
+      color: var(--gold-light);
+      border: 1px solid rgba(246,196,83,.24);
+      border-radius: 999px;
+      padding: 6px 9px;
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+    }
+
+    .product h3 {
+      margin: 15px 0 7px;
+      font-size: 18px;
+    }
+
+    .description {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+      min-height: 39px;
+      margin: 0 0 15px;
+    }
+
+    .price-label {
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 5px;
+    }
+
+    .price {
+      color: var(--gold-light);
+      font-size: 21px;
+      font-weight: 900;
+      overflow-wrap: anywhere;
+      margin-bottom: 16px;
+    }
+
+    .purchase-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: auto;
+    }
+
+    .quantity {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      background: rgba(4,8,15,.4);
+      border: 1px solid var(--border);
+      padding: 5px;
+      border-radius: 11px;
+    }
+
+    .quantity button {
+      width: 30px;
+      height: 30px;
+      border: 0;
+      border-radius: 8px;
+      background: #293650;
+      color: white;
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .quantity button:hover {
+      background: #3b4d6d;
+    }
+
+    .quantity span {
+      min-width: 20px;
+      text-align: center;
+      font-weight: 800;
+    }
+
+    .buy-btn {
+      border: 0;
+      border-radius: 11px;
+      background: linear-gradient(135deg, #ffe49a, #f6c453);
+      color: #281b05;
+      padding: 11px 13px;
+      font-size: 12px;
+      font-weight: 900;
+      transition: transform .15s ease, filter .15s ease;
+    }
+
+    .buy-btn:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.08);
+    }
+
+    .buy-btn:disabled {
+      cursor: not-allowed;
+      filter: grayscale(.8);
+      opacity: .55;
+      transform: none;
+    }
+
+    .message {
+      min-height: 22px;
+      margin: 14px 0;
+      color: var(--gold-light);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .lower-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 28px 0 50px;
+    }
+
+    .box {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 20px;
+      min-width: 0;
+    }
+
+    .box h2 {
+      margin: 0 0 14px;
+      font-size: 20px;
+    }
+
+    .history-list {
+      display: grid;
+      gap: 10px;
+      max-height: 350px;
+      overflow: auto;
+    }
+
+    .history-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      border-bottom: 1px solid var(--border);
+      padding: 9px 0;
+      font-size: 13px;
+    }
+
+    .history-item:last-child {
+      border-bottom: 0;
+    }
+
+    .history-item small {
+      display: block;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .history-price {
+      color: var(--gold-light);
+      font-weight: 800;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .empty {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .secondary-btn {
+      background: #293650;
+      border: 1px solid rgba(255,255,255,.10);
+      color: white;
+      border-radius: 11px;
+      padding: 11px 14px;
+      font-weight: 800;
+    }
+
+    .secondary-btn:hover {
+      background: #3b4d6d;
+    }
+
+    .budget-control {
+      display: flex;
+      gap: 9px;
+      margin-top: 13px;
+    }
+
+    .budget-control input {
+      width: 100%;
+      min-width: 0;
+      background: #0b1220;
+      border: 1px solid var(--border);
+      color: white;
+      border-radius: 10px;
+      padding: 11px;
+    }
+
+    .budget-control button {
+      flex: 0 0 auto;
+      background: var(--gold);
+      color: #251904;
+      border: 0;
+      border-radius: 10px;
+      padding: 0 14px;
+      font-weight: 900;
+    }
+
+    footer {
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+      padding: 0 0 28px;
+    }
+
+    @media (max-width: 900px) {
+      .products {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 650px) {
+      header {
+        padding-top: 28px;
+      }
+
+      .dashboard {
         grid-template-columns: 1fr;
-    }
-}
+      }
 
-@media (max-width: 520px) {
+      .products {
+        grid-template-columns: 1fr;
+      }
 
-    .app {
-        display: block;
-    }
+      .lower-grid {
+        grid-template-columns: 1fr;
+      }
 
-    .sidebar {
+      .mode-btn {
         width: 100%;
-        border-right: 0;
-        border-bottom: 1px solid var(--line);
-    }
+      }
 
-    .nav {
-        grid-template-columns: 1fr 1fr;
-    }
+      .purchase-row {
+        align-items: stretch;
+      }
 
-    .side-bottom {
-        margin-top: 0;
-        grid-template-columns: 1fr 1fr;
+      .buy-btn {
+        flex: 1;
+      }
     }
-
-    .main {
-        padding: 15px;
-    }
-}
-</style>
+  </style>
 </head>
 
-<body><div class="app">
+<body>
+  <header class="container">
+    <div class="eyebrow">Simulador de compras</div>
+    <h1>Gaste a <span>Fortuna</span></h1>
+    <p class="subtitle">
+      Imagine ter uma fortuna gigantesca. Escolha o que comprar, defina as quantidades
+      e veja quanto dinheiro ainda sobra.
+    </p>
 
-    <!-- BARRA LATERAL -->
-    <aside class="sidebar">
+    <div class="mode-panel" aria-label="Escolha o modo de jogo">
+      <button id="unlimitedBtn" class="mode-btn active" aria-pressed="true">
+        ♾️ Dinheiro Ilimitado
+      </button>
+      <button id="limitedBtn" class="mode-btn" aria-pressed="false">
+        💰 Fortuna Limitada
+      </button>
+    </div>
+  </header>
 
-        <div class="logo">
-            📝 Meu <span>Bloco</span>
-        </div>
+  <main class="container">
+    <section class="dashboard">
+      <div class="stat">
+        <div class="stat-label">Fortuna disponível</div>
+        <div class="stat-value gold" id="balance">$ 999.999.999.999</div>
+      </div>
 
-        <button class="new" onclick="openNew()">
-            ＋ Nova anotação
-        </button>
+      <div class="stat">
+        <div class="stat-label">Total gasto</div>
+        <div class="stat-value" id="spent">$ 0</div>
+      </div>
 
-        <input
-            class="search"
-            id="search"
-            type="text"
-            placeholder="🔎 Procurar..."
-            oninput="render()"
-        >
+      <div class="stat">
+        <div class="stat-label">Itens comprados</div>
+        <div class="stat-value" id="itemCount">0</div>
+      </div>
+    </section>
 
-        <div class="nav">
+    <section class="progress-wrap">
+      <div class="progress-top">
+        <span>Porcentagem da fortuna utilizada</span>
+        <strong id="percentage">0%</strong>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+    </section>
 
-            <button
-                id="allBtn"
-                class="active"
-                onclick="setFilter('all')"
-            >
-                📒 Todas as notas
-            </button>
+    <div class="toolbar">
+      <input
+        id="searchInput"
+        class="search"
+        type="search"
+        placeholder="🔎 Buscar produto..."
+        aria-label="Buscar produto"
+      />
 
-            <button onclick="setFilter('pinned')">
-                📌 Fixadas
-            </button>
-
-        </div>
-
-        <div class="side-bottom">
-
-            <button
-                class="small-btn"
-                onclick="toggleDark()"
-            >
-                🌙 Tema
-            </button>
-
-            <button
-                class="small-btn"
-                onclick="exportNotes()"
-            >
-                ⬇️ Exportar
-            </button>
-
-            <button
-                class="small-btn"
-                onclick="importNotes()"
-            >
-                ⬆️ Importar
-            </button>
-
-            <input
-                type="file"
-                id="file"
-                accept=".json"
-                hidden
-                onchange="readImport(event)"
-            >
-
-        </div>
-
-    </aside>
-
-
-    <!-- ÁREA PRINCIPAL -->
-    <main class="main">
-
-        <div class="top">
-
-            <div>
-
-                <div class="title">
-                    Minhas anotações
-                </div>
-
-                <div
-                    class="counter"
-                    id="counter"
-                ></div>
-
-            </div>
-
-        </div>
-
-
-        <!-- AS NOTAS APARECERÃO AQUI -->
-        <section
-            class="notes"
-            id="notes"
-        ></section>
-
-    </main>
-
-</div>
-
-
-<!-- JANELA PARA CRIAR/EDITAR NOTA -->
-
-<div
-    class="modal-bg"
-    id="modal"
->
-
-    <div class="modal">
-
-        <div class="modal-head">
-
-            <strong id="modalTitle">
-                Nova anotação
-            </strong>
-
-            <button
-                class="close"
-                onclick="closeModal()"
-            >
-                ×
-            </button>
-
-        </div>
-
-
-        <input
-            id="noteTitle"
-            maxlength="100"
-            placeholder="Título da anotação"
-        >
-
-
-        <textarea
-            id="noteBody"
-            placeholder="Escreva sua anotação aqui..."
-        ></textarea>
-
-
-        <div class="actions">
-
-            <div class="actions-left">
-
-                <button
-                    class="action delete"
-                    id="deleteBtn"
-                    onclick="deleteCurrent()"
-                >
-                    🗑️ Excluir
-                </button>
-
-                <button
-                    class="action"
-                    id="pinBtn"
-                    onclick="togglePin()"
-                >
-                    📌 Fixar
-                </button>
-
-            </div>
-
-
-            <div class="actions-right">
-
-                <button
-                    class="action"
-                    onclick="closeModal()"
-                >
-                    Cancelar
-                </button>
-
-                <button
-                    class="action save"
-                    onclick="saveNote()"
-                >
-                    Salvar
-                </button>
-
-            </div>
-
-        </div>
-
+      <select id="sortSelect" aria-label="Ordenar produtos">
+        <option value="default">Ordenar: padrão</option>
+        <option value="cheap">Menor preço</option>
+        <option value="expensive">Maior preço</option>
+        <option value="name">Nome A–Z</option>
+      </select>
     </div>
 
-</div>
-
-
-<script>let notes = JSON.parse(
-    localStorage.getItem("meuBlocoNotas") || "[]"
-);
-
-let filter = "all";
-let currentId = null;
-
-
-/* SALVAR DADOS */
-
-function saveData() {
-
-    localStorage.setItem(
-        "meuBlocoNotas",
-        JSON.stringify(notes)
-    );
-
-}
-
-
-/* NOVA ANOTAÇÃO */
-
-function openNew() {
-
-    currentId = null;
-
-    document.getElementById("modalTitle").textContent =
-        "Nova anotação";
-
-    document.getElementById("noteTitle").value = "";
-
-    document.getElementById("noteBody").value = "";
-
-    document.getElementById("deleteBtn").style.display =
-        "none";
-
-    updatePinButton(false);
-
-    document
-        .getElementById("modal")
-        .classList.add("show");
-
-    setTimeout(() => {
-
-        document
-            .getElementById("noteTitle")
-            .focus();
-
-    }, 50);
-
-}
-
-
-/* EDITAR ANOTAÇÃO */
-
-function openEdit(id) {
-
-    const note = notes.find(
-        item => item.id === id
-    );
-
-    if (!note) return;
-
-    currentId = id;
-
-    document.getElementById("modalTitle").textContent =
-        "Editar anotação";
-
-    document.getElementById("noteTitle").value =
-        note.title;
-
-    document.getElementById("noteBody").value =
-        note.body;
-
-    document.getElementById("deleteBtn").style.display =
-        "block";
-
-    updatePinButton(note.pinned);
-
-    document
-        .getElementById("modal")
-        .classList.add("show");
-
-}
-
-
-/* FECHAR JANELA */
-
-function closeModal() {
-
-    document
-        .getElementById("modal")
-        .classList.remove("show");
-
-}
-
-
-/* SALVAR ANOTAÇÃO */
-
-function saveNote() {
-
-    const title =
-        document
-            .getElementById("noteTitle")
-            .value
-            .trim() || "Sem título";
-
-    const body =
-        document
-            .getElementById("noteBody")
-            .value
-            .trim();
-
-
-    /* EDITANDO UMA NOTA */
-
-    if (currentId) {
-
-        const note = notes.find(
-            item => item.id === currentId
-        );
-
-        note.title = title;
-        note.body = body;
-        note.updated = Date.now();
-
-    }
-
-
-    /* CRIANDO UMA NOVA NOTA */
-
-    else {
-
-        notes.unshift({
-
-            id: Date.now().toString(),
-
-            title: title,
-
-            body: body,
-
-            pinned: false,
-
-            updated: Date.now()
-
-        });
-
-    }
-
-
-    saveData();
-
-    closeModal();
-
-    render();
-
-}
-
-
-/* EXCLUIR */
-
-function deleteCurrent() {
-
-    if (!currentId) return;
-
-
-    if (
-        confirm(
-            "Tem certeza que deseja excluir esta anotação?"
-        )
-    ) {
-
-        notes = notes.filter(
-            note => note.id !== currentId
-        );
-
-        saveData();
-
-        closeModal();
-
-        render();
-
-    }
-
-}
-
-
-/* FIXAR / DESFIXAR */
-
-function togglePin() {
-
-    if (!currentId) return;
-
-    const note = notes.find(
-        item => item.id === currentId
-    );
-
-    if (!note) return;
-
-    note.pinned = !note.pinned;
-
-    updatePinButton(note.pinned);
-
-    saveData();
-
-    render();
-
-}
-
-
-/* TEXTO DO BOTÃO DE FIXAR */
-
-function updatePinButton(pinned) {
-
-    document.getElementById("pinBtn").textContent =
-        pinned
-            ? "📌 Desfixar"
-            : "📌 Fixar";
-
-}
-
-
-/* FILTRO */
-
-function setFilter(type) {
-
-    filter = type;
-
-
-    document
-        .querySelectorAll(".nav button")
-        .forEach(button => {
-
-            button.classList.remove("active");
-
-        });
-
-
-    if (type === "all") {
-
-        document
-            .getElementById("allBtn")
-            .classList.add("active");
-
-    }
-
-    else {
-
-        document
-            .querySelectorAll(".nav button")[1]
-            .classList.add("active");
-
-    }
-
-
-    render();
-
-}
-
-
-/* MOSTRAR NOTAS */
-
-function render() {
-
-    const search =
-        document
-            .getElementById("search")
-            .value
-            .toLowerCase();
-
-
-    let list = notes.filter(note => {
-
-        const matchesFilter =
-            filter === "all" || note.pinned;
-
-        const matchesSearch =
-            note.title
-                .toLowerCase()
-                .includes(search)
-
-            ||
-
-            note.body
-                .toLowerCase()
-                .includes(search);
-
-
-        return matchesFilter && matchesSearch;
-
+    <div class="section-heading">
+      <h2>Loja de coisas absurdamente caras</h2>
+      <span id="productCount">20 produtos</span>
+    </div>
+
+    <div id="message" class="message" role="status" aria-live="polite"></div>
+    <section class="products" id="products"></section>
+
+    <section class="lower-grid">
+      <div class="box">
+        <h2>🧾 Minhas compras</h2>
+        <div id="history" class="history-list">
+          <p class="empty">Você ainda não comprou nada. Escolha um produto para começar!</p>
+        </div>
+        <div class="actions">
+          <button class="secondary-btn" id="shareBtn">Compartilhar resultado</button>
+          <button class="secondary-btn" id="resetBtn">Reiniciar simulação</button>
+        </div>
+      </div>
+
+      <div class="box">
+        <h2>⚙️ Configurar fortuna</h2>
+        <p class="empty">
+          No modo Fortuna Limitada, defina o dinheiro inicial que deseja usar na simulação.
+        </p>
+        <div class="budget-control">
+          <input id="budgetInput" type="number" min="1" step="1000000" value="1000000000"
+            aria-label="Fortuna inicial em dólares" />
+          <button id="applyBudgetBtn">Aplicar</button>
+        </div>
+        <div class="actions">
+          <button class="secondary-btn" id="billionBtn">1 bilhão</button>
+          <button class="secondary-btn" id="trillionBtn">1 trilhão</button>
+          <button class="secondary-btn" id="quadrillionBtn">1 quadrilhão</button>
+        </div>
+        <p class="empty" style="margin-top:14px;">
+          Os valores são fictícios e apresentados em dólares americanos (USD).
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="container">
+    Simulador fictício para diversão. Nenhuma compra real é realizada.
+  </footer>
+
+  <script>
+    const products = [
+      { id: 1, name: "Ilha particular", icon: "🏝️", category: "Imóveis", price: 85000000, description: "Uma ilha só sua, com praias e vista para o oceano." },
+      { id: 2, name: "Mansão de luxo", icon: "🏰", category: "Imóveis", price: 125000000, description: "Uma residência gigantesca com cinema e piscina." },
+      { id: 3, name: "Iate de luxo", icon: "🛥️", category: "Veículos", price: 210000000, description: "Um iate equipado para viagens de alto padrão." },
+      { id: 4, name: "Jato particular", icon: "✈️", category: "Veículos", price: 95000000, description: "Viaje pelo mundo em um jato particular." },
+      { id: 5, name: "Carro esportivo exclusivo", icon: "🏎️", category: "Veículos", price: 5000000, description: "Um supercarro de edição extremamente limitada." },
+      { id: 6, name: "Estádio de futebol", icon: "🏟️", category: "Entretenimento", price: 1500000000, description: "Um estádio completo para grandes eventos." },
+      { id: 7, name: "Equipe profissional de futebol", icon: "⚽", category: "Esportes", price: 2800000000, description: "Uma equipe esportiva de alto nível." },
+      { id: 8, name: "Hotel cinco estrelas", icon: "🏨", category: "Imóveis", price: 750000000, description: "Um hotel luxuoso em uma cidade turística." },
+      { id: 9, name: "Arranha-céu", icon: "🏙️", category: "Imóveis", price: 2200000000, description: "Um edifício comercial com dezenas de andares." },
+      { id: 10, name: "Museu particular", icon: "🖼️", category: "Arte", price: 400000000, description: "Uma coleção de obras de arte raras." },
+      { id: 11, name: "Coleção de diamantes", icon: "💎", category: "Luxo", price: 650000000, description: "Uma coleção fictícia de pedras preciosas raríssimas." },
+      { id: 12, name: "Submarino particular", icon: "🤿", category: "Veículos", price: 180000000, description: "Um submarino de exploração oceânica." },
+      { id: 13, name: "Parque de diversões", icon: "🎢", category: "Entretenimento", price: 1200000000, description: "Um parque completo com atrações gigantes." },
+      { id: 14, name: "Satélite particular", icon: "🛰️", category: "Tecnologia", price: 300000000, description: "Um satélite para projetos de comunicação." },
+      { id: 15, name: "Foguete espacial", icon: "🚀", category: "Tecnologia", price: 900000000, description: "Um projeto espacial privado fictício." },
+      { id: 16, name: "Cidade futurista", icon: "🌆", category: "Mega projetos", price: 25000000000, description: "Uma cidade experimental de alta tecnologia." },
+      { id: 17, name: "Montanha particular", icon: "⛰️", category: "Terrenos", price: 450000000, description: "Uma enorme área de terra com paisagens naturais." },
+      { id: 18, name: "Estação espacial", icon: "🪐", category: "Mega projetos", price: 85000000000, description: "Um projeto espacial imaginário de escala gigantesca." },
+      { id: 19, name: "País fictício", icon: "🌎", category: "Mega projetos", price: 500000000000, description: "Uma experiência imaginária de administração de território." },
+      { id: 20, name: "Planeta particular", icon: "🪐", category: "Mega projetos", price: 999999999999, description: "O item mais absurdo da loja: um planeta fictício." }
+    ];
+
+    const money = new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      maximumFractionDigits: 0
     });
 
+    let unlimited = true;
+    let startingFortune = 1000000000;
+    let balance = startingFortune;
+    let spent = 0;
+    let itemCount = 0;
+    let purchases = [];
+    let quantities = {};
 
-    /* NOTAS FIXADAS PRIMEIRO */
+    products.forEach(product => quantities[product.id] = 1);
 
-    list.sort((a, b) => {
+    const productsEl = document.getElementById("products");
+    const historyEl = document.getElementById("history");
+    const messageEl = document.getElementById("message");
 
-        return (
-            (b.pinned - a.pinned)
-            ||
-            ((b.updated || 0) - (a.updated || 0))
-        );
+    function formatMoney(value) {
+      return money.format(value);
+    }
 
-    });
+    function setMessage(text, isError = false) {
+      messageEl.textContent = text;
+      messageEl.style.color = isError ? "var(--red)" : "var(--gold-light)";
+    }
 
+    function setMode(isUnlimited) {
+      unlimited = isUnlimited;
 
-    document.getElementById("counter").textContent =
+      document.getElementById("unlimitedBtn").classList.toggle("active", unlimited);
+      document.getElementById("limitedBtn").classList.toggle("active", !unlimited);
 
-        `${list.length} ${
-            list.length === 1
-                ? "anotação"
-                : "anotações"
-        }`;
+      document.getElementById("unlimitedBtn").setAttribute("aria-pressed", String(unlimited));
+      document.getElementById("limitedBtn").setAttribute("aria-pressed", String(!unlimited));
 
+      setMessage(unlimited
+        ? "Modo Dinheiro Ilimitado ativado. Compre sem limite de saldo!"
+        : "Modo Fortuna Limitada ativado. Suas compras serão descontadas da fortuna."
+      );
 
-    const box =
-        document.getElementById("notes");
+      render();
+    }
 
+    function changeQuantity(id, amount) {
+      quantities[id] = Math.max(1, (quantities[id] || 1) + amount);
+      renderProducts();
+    }
 
-    /* NENHUMA NOTA */
+    function buyProduct(id) {
+      const product = products.find(item => item.id === id);
+      const quantity = quantities[id] || 1;
+      const total = product.price * quantity;
 
-    if (list.length === 0) {
+      if (!unlimited && total > balance) {
+        setMessage("Saldo insuficiente para realizar essa compra. Tente diminuir a quantidade.", true);
+        return;
+      }
 
-        box.innerHTML = `
+      if (!unlimited) {
+        balance -= total;
+      }
 
-            <div class="empty">
+      spent += total;
+      itemCount += quantity;
 
-                <strong>
-                    Nenhuma anotação encontrada
-                </strong>
+      purchases.unshift({
+        name: product.name,
+        quantity,
+        total
+      });
 
-                <span>
-                    Crie sua primeira anotação
-                    clicando em "Nova anotação".
-                </span>
+      quantities[id] = 1;
+      setMessage(`Compra realizada: ${quantity} × ${product.name}.`);
+      render();
+    }
 
+    function renderProducts() {
+      const search = document.getElementById("searchInput").value.trim().toLowerCase();
+      const sort = document.getElementById("sortSelect").value;
+
+      let filtered = products.filter(product =>
+        product.name.toLowerCase().includes(search) ||
+        product.category.toLowerCase().includes(search) ||
+        product.description.toLowerCase().includes(search)
+      );
+
+      if (sort === "cheap") filtered.sort((a, b) => a.price - b.price);
+      if (sort === "expensive") filtered.sort((a, b) => b.price - a.price);
+      if (sort === "name") filtered.sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
+
+      document.getElementById("productCount").textContent =
+        `${filtered.length} ${filtered.length === 1 ? "produto" : "produtos"}`;
+
+      productsEl.innerHTML = "";
+
+      if (filtered.length === 0) {
+        productsEl.innerHTML = '<p class="empty">Nenhum produto encontrado. Tente outra busca.</p>';
+        return;
+      }
+
+      filtered.forEach(product => {
+        const quantity = quantities[product.id] || 1;
+        const total = product.price * quantity;
+        const canBuy = unlimited || total <= balance;
+
+        const card = document.createElement("article");
+        card.className = "product";
+
+        card.innerHTML = `
+          <div class="product-top">
+            <div class="product-icon" aria-hidden="true">${product.icon}</div>
+            <span class="tag">${product.category}</span>
+          </div>
+
+          <h3>${product.name}</h3>
+          <p class="description">${product.description}</p>
+
+          <div class="price-label">Preço por unidade</div>
+          <div class="price">${formatMoney(product.price)}</div>
+
+          <div class="purchase-row">
+            <div class="quantity" aria-label="Quantidade">
+              <button type="button" aria-label="Diminuir quantidade" data-action="minus">−</button>
+              <span>${quantity}</span>
+              <button type="button" aria-label="Aumentar quantidade" data-action="plus">+</button>
             </div>
-
+            <button type="button" class="buy-btn" ${canBuy ? "" : "disabled"}>
+              🛒 COMPRAR
+            </button>
+          </div>
         `;
 
+        card.querySelector('[data-action="minus"]').addEventListener("click", () => {
+          changeQuantity(product.id, -1);
+        });
+
+        card.querySelector('[data-action="plus"]').addEventListener("click", () => {
+          changeQuantity(product.id, 1);
+        });
+
+        card.querySelector(".buy-btn").addEventListener("click", () => {
+          buyProduct(product.id);
+        });
+
+        productsEl.appendChild(card);
+      });
+    }
+
+    function renderHistory() {
+      if (purchases.length === 0) {
+        historyEl.innerHTML =
+          '<p class="empty">Você ainda não comprou nada. Escolha um produto para começar!</p>';
         return;
+      }
 
+      historyEl.innerHTML = purchases.map(item => `
+        <div class="history-item">
+          <div>
+            <strong>${item.name}</strong>
+            <small>Quantidade: ${item.quantity}</small>
+          </div>
+          <div class="history-price">${formatMoney(item.total)}</div>
+        </div>
+      `).join("");
     }
 
-
-    /* CRIAR CARDS */
-
-    box.innerHTML = list.map(note => `
-
-        <article
-            class="note ${
-                note.pinned ? "pinned" : ""
-            }"
-            onclick="openEdit('${note.id}')"
-        >
-
-            ${
-                note.pinned
-                    ? '<div class="pin">📌</div>'
-                    : ''
-            }
-
-
-            <h3>
-                ${escapeHtml(note.title)}
-            </h3>
-
-
-            <p>
-                ${escapeHtml(
-                    note.body || "Sem conteúdo."
-                )}
-            </p>
-
-
-            <footer>
-                ${formatDate(note.updated)}
-            </footer>
-
-        </article>
-
-    `).join("");
-
-}
-
-
-/* PROTEGER TEXTO HTML */
-
-function escapeHtml(text) {
-
-    return text.replace(
-        /[&<>"']/g,
-
-        character => ({
-
-            "&": "&amp;",
-            "<": "&lt;",
-            ">": "&gt;",
-            '"': "&quot;",
-            "'": "&#039;"
-
-        })[character]
-
-    );
-
-}
-
-
-/* DATA */
-
-function formatDate(timestamp) {
-
-    return new Date(
-        timestamp || Date.now()
-    ).toLocaleString(
-        "pt-BR",
-        {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit"
-        }
-    );
-
-}
-
-
-/* MODO ESCURO */
-
-function toggleDark() {
-
-    document
-        .body
-        .classList
-        .toggle("dark");
-
-
-    localStorage.setItem(
-
-        "meuBlocoTema",
-
-        document
-            .body
-            .classList
-            .contains("dark")
-                ? "dark"
-                : "light"
-
-    );
-
-}
-
-
-/* EXPORTAR */
-
-function exportNotes() {
-
-    const blob = new Blob(
-
-        [
-            JSON.stringify(
-                notes,
-                null,
-                2
-            )
-        ],
-
-        {
-            type: "application/json"
-        }
-
-    );
-
-
-    const link =
-        document.createElement("a");
-
-
-    link.href =
-        URL.createObjectURL(blob);
-
-
-    link.download =
-        "minhas-anotacoes.json";
-
-
-    link.click();
-
-
-    URL.revokeObjectURL(link.href);
-
-}
-
-
-/* IMPORTAR */
-
-function importNotes() {
-
-    document
-        .getElementById("file")
-        .click();
-
-}
-
-
-/* LER ARQUIVO IMPORTADO */
-
-function readImport(event) {
-
-    const file =
-        event.target.files[0];
-
-
-    if (!file) return;
-
-
-    const reader =
-        new FileReader();
-
-
-    reader.onload = () => {
-
+    function render() {
+      document.getElementById("balance").textContent =
+        unlimited ? "Ilimitado ∞" : formatMoney(balance);
+
+      document.getElementById("spent").textContent = formatMoney(spent);
+      document.getElementById("itemCount").textContent = itemCount.toLocaleString("pt-BR");
+
+      const percentage = unlimited || startingFortune <= 0
+        ? 0
+        : Math.min(100, (spent / startingFortune) * 100);
+
+      document.getElementById("percentage").textContent =
+        unlimited ? "—" : `${percentage.toFixed(2).replace(".", ",")}%`;
+
+      document.getElementById("progressFill").style.width =
+        unlimited ? "0%" : `${percentage}%`;
+
+      renderProducts();
+      renderHistory();
+    }
+
+    function applyBudget(value) {
+      const amount = Number(value);
+
+      if (!Number.isFinite(amount) || amount <= 0) {
+        setMessage("Digite uma fortuna válida maior que zero.", true);
+        return;
+      }
+
+      startingFortune = amount;
+      balance = amount;
+      spent = 0;
+      itemCount = 0;
+      purchases = [];
+
+      setMode(false);
+      setMessage(`Fortuna limitada definida para ${formatMoney(amount)}. Boa sorte!`);
+    }
+
+    function resetSimulation() {
+      balance = startingFortune;
+      spent = 0;
+      itemCount = 0;
+      purchases = [];
+      products.forEach(product => quantities[product.id] = 1);
+      setMessage("Simulação reiniciada.");
+      render();
+    }
+
+    document.getElementById("unlimitedBtn").addEventListener("click", () => setMode(true));
+    document.getElementById("limitedBtn").addEventListener("click", () => setMode(false));
+
+    document.getElementById("searchInput").addEventListener("input", renderProducts);
+    document.getElementById("sortSelect").addEventListener("change", renderProducts);
+
+    document.getElementById("applyBudgetBtn").addEventListener("click", () => {
+      applyBudget(document.getElementById("budgetInput").value);
+    });
+
+    document.getElementById("billionBtn").addEventListener("click", () => {
+      document.getElementById("budgetInput").value = 1000000000;
+      applyBudget(1000000000);
+    });
+
+    document.getElementById("trillionBtn").addEventListener("click", () => {
+      document.getElementById("budgetInput").value = 1000000000000;
+      applyBudget(1000000000000);
+    });
+
+    document.getElementById("quadrillionBtn").addEventListener("click", () => {
+      document.getElementById("budgetInput").value = 1000000000000000;
+      applyBudget(1000000000000000);
+    });
+
+    document.getElementById("resetBtn").addEventListener("click", resetSimulation);
+
+    document.getElementById("shareBtn").addEventListener("click", async () => {
+      const result = [
+        "Meu resultado no Gaste a Fortuna!",
+        `Modo: ${unlimited ? "Dinheiro Ilimitado" : "Fortuna Limitada"}`,
+        `Total gasto: ${formatMoney(spent)}`,
+        `Itens comprados: ${itemCount}`,
+        unlimited ? "Saldo: Ilimitado" : `Saldo restante: ${formatMoney(balance)}`
+      ].join("\n");
+
+      if (navigator.share) {
         try {
-
-            const imported =
-                JSON.parse(
-                    reader.result
-                );
-
-
-            if (!Array.isArray(imported)) {
-
-                throw new Error();
-
-            }
-
-
-            notes = imported;
-
-            saveData();
-
-            render();
-
-            alert(
-                "Anotações importadas com sucesso!"
-            );
-
+          await navigator.share({ title: "Gaste a Fortuna", text: result });
+        } catch (error) {
+          // O usuário pode cancelar o compartilhamento.
         }
-
-        catch {
-
-            alert(
-                "O arquivo selecionado é inválido."
-            );
-
+      } else if (navigator.clipboard) {
+        try {
+          await navigator.clipboard.writeText(result);
+          setMessage("Resultado copiado! Agora você pode compartilhar.");
+        } catch (error) {
+          setMessage(result);
         }
+      } else {
+        setMessage(result);
+      }
+    });
 
-    };
-
-
-    reader.readAsText(file);
-
-
-    event.target.value = "";
-
-}
-
-
-/* CARREGAR TEMA */
-
-if (
-    localStorage.getItem("meuBlocoTema")
-    ===
-    "dark"
-) {
-
-    document
-        .body
-        .classList
-        .add("dark");
-
-}
-
-
-/* MOSTRAR NOTAS AO ABRIR */
-
-render();
-
-
-/* FECHAR CLICANDO FORA DA JANELA */
-
-document
-    .getElementById("modal")
-    .addEventListener(
-        "click",
-        event => {
-
-            if (
-                event.target.id === "modal"
-            ) {
-
-                closeModal();
-
-            }
-
-        }
-    );
-
-
-/* TECLA ESC */
-
-document.addEventListener(
-    "keydown",
-    event => {
-
-        if (event.key === "Escape") {
-
-            closeModal();
-
-        }
-
-
-        /* CTRL + ENTER = SALVAR */
-
-        if (
-            (event.ctrlKey || event.metaKey)
-            &&
-            event.key === "Enter"
-            &&
-            document
-                .getElementById("modal")
-                .classList
-                .contains("show")
-        ) {
-
-            saveNote();
-
-        }
-
-    }
-);
-
-</script>
-
+    render();
+  </script>
 </body>
 </html>
